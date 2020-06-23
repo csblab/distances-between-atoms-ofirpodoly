@@ -10,11 +10,10 @@ function downloadMolecule(code) {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-        // callback function here
-        let result = getAtomCoordinates(this.responseText);
-        let infoResult = getAtomInfo(this.responseText);
-        displayOnPage(result + "\n" + "\n" + infoResult);
-        // displayOnPage("hello Ofir")
+        let result = getAtomInformation(this.responseText);
+        // let infoResult = getAtomInfo(this.responseText);
+        displayOnPage(result);
+
     }
   };
 
@@ -29,70 +28,69 @@ function run() {
     downloadMolecule(pdbcode);
 }
 
-function getAtomCoordinates(pdbfile) {
+function getAtomInformation(pdbfile) {
   let array = pdbfile.split("\n");
-  let tempArray = [];
-  let xyzCoordinates = [[],[]];
-  for (let counter=0; counter <= array.length; counter += 1) {
-    if (typeof(array[counter]) != "undefined" 
-    && array[counter].startsWith("ATOM") && !Number.isNaN(array[counter])) {
-      tempArray.push(array[counter].slice(30, 38))
-      tempArray.push(array[counter].slice(38, 46))
-      tempArray.push(array[counter].slice(46, 54))
-      xyzCoordinates.push(tempArray)
-      // console.log(tempArray)
-      tempArray = []
-    }
-  }
-  return xyzCoordinates
-}
+  let xyzCoordinates = [];
+  
 
-
-function getAtomInfo(pdbfile) {
- 
-  let array = pdbfile.split("\n");
   var atom = {name: null, chain: null, resNum: null, resName: null}
   let finalAtomInfo = []
-  
-  for (let counter=0; counter <= array.length; counter += 1) {
-    if (typeof(array[counter]) != "undefined" 
-    && array[counter].startsWith("ATOM") && !Number.isNaN(array[counter])) {
-      atom.name = array[counter].slice(13, 16)
-      atom.chain = array[counter].slice(21, 23)
-      atom.resNum = array[counter].slice(23, 26)
-      atom.resName = array[counter].slice(18, 20)
-      let polishedInfo = Object.values(atom)
-      // console.log(polishedInfo)
-      finalAtomInfo.push(polishedInfo);
+
+  for (let counter=0; counter < array.length; counter += 1) {
+
+    if (array[counter].startsWith("ATOM")) {
+      let xCoordinate = Number(array[counter].slice(30, 38))
+      
+      let yCoordinate = Number(array[counter].slice(38, 46))
+      
+      let zCoordinate = Number(array[counter].slice(46, 54))
+      
+      atom.name = array[counter].slice(12, 16)
+      atom.chain = array[counter].slice(21, 22)
+      atom.resNum = array[counter].slice(22, 26)
+      atom.resName = array[counter].slice(17, 20)
+
+      finalAtomInfo.push(atom)
+      
       atom = {name: null, chain: null, resNum: null, resName: null}
+
+
+      if (!Number.isNaN(xCoordinate) && !Number.isNaN(yCoordinate) && !Number.isNaN(zCoordinate)) {
+        xyzCoordinates.push([xCoordinate, yCoordinate, zCoordinate])
+        
+      }
+      else {
+        console.log("line " + counter + " does not contain coordinates")
+      }
     }
   }
-  
-  return finalAtomInfo
+  function euclideanDistance(x1, y1, z1, x2, y2, z2) {
+    return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2))
 }
 
 
+function createMatrix(distanceParamater) {
+
+  let matrix = [];
+
+  for (i=0; i < xyzCoordinates.length; i++) {
+    for (j=0; j < xyzCoordinates.length; j++) {
+       distance_ij = euclideanDistance(xyzCoordinates[i][0], xyzCoordinates[i][1], xyzCoordinates[i][2], xyzCoordinates[j][0], xyzCoordinates[j][1], xyzCoordinates[j][2])
+        if (distance_ij < distanceParamater) {
+          matrix[i][j] = 1
+        }
+
+        else {
+          matrix[i][j] = 0
+        }
+     // console.log("i=", i, "j=", j, "dist=", distance_ij);
+     
+    }
+  }
+return matrix
+}
 
 
-
-
-
-
-
-
-
-
-
-// for (let i = 0; i<= finalAtomInfo.length; i++) {
-  //   if (typeof(finalAtomInfo[i]) != "undefined") {
-
-
-
-  //     console.log(Object.values(finalAtomInfo[i]))
-  //     // console.log(finalAtomInfo[i].name)
-  // console.log(finalAtomInfo[i].chain)
-  // console.log(finalAtomInfo[i].resNum)
-  // console.log(finalAtomInfo[i].resName)
-  //   }
-
-  // }
+  
+  return xyzCoordinates + finalAtomInfo + createMatrix(10)
+}
