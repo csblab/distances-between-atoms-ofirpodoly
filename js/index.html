@@ -18,11 +18,19 @@
     <input type="text" id='input-text'>
     <br/>
 
+    <br/>
+
+    <label>Enter a distance parameter in Angstrom (e.g. 10):</label>
+    <input type="text" id='distance-input'>
+
+    <br/>
+
     <input type="submit" value="Submit!" onclick="run();">
     <br/>
 
     <div id="result"></div>
-    <script src="parser.js"></script>
+    <script type="module" src="parser.js"></script>
+    <script type="module" src="connectivity.js"></script> 
     
 </body>
 </html>

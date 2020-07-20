@@ -1,5 +1,5 @@
-// // Module to store parsing/reading code
-
+// Module to store parsing/reading code
+import { createMatrix } from './connectivity.js';
 
 function displayOnPage(content) {
     let resultField = document.getElementById("result");
@@ -10,10 +10,13 @@ function downloadMolecule(code) {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-        let result = getAtomInformation(this.responseText);
-        // let infoResult = getAtomInfo(this.responseText);
+        // let result = getAtomInformation(this.responseText);
+        // let distMatrix = createMatrix(result[0], d);
+        // let finalEverything = [result, distMatrix]
+        let result = combineElements();
+        // displayOnPage(finalEverything);
         displayOnPage(result);
-
+        
     }
   };
 
@@ -26,7 +29,22 @@ function run() {
     let inputbox = document.getElementById("input-text");
     let pdbcode = inputbox.value;
     downloadMolecule(pdbcode);
+    
+    
+    
+    
+
 }
+
+//this is the code that takes the input from the box for distance parameter
+let inputbox1 =  document.getElementById("distance-input");
+let d = inputbox1.value;
+
+window.run = run;
+// console.log("abcdfg");
+
+
+
 
 function getAtomInformation(pdbfile) {
   let array = pdbfile.split("\n");
@@ -34,7 +52,7 @@ function getAtomInformation(pdbfile) {
   
 
   var atom = {name: null, chain: null, resNum: null, resName: null}
-  let finalAtomInfo = []
+  let finalAtomInfo = [];
 
   for (let counter=0; counter < array.length; counter += 1) {
 
@@ -64,33 +82,42 @@ function getAtomInformation(pdbfile) {
       }
     }
   }
-  function euclideanDistance(x1, y1, z1, x2, y2, z2) {
-    return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2))
-}
-
-
-function createMatrix(distanceParamater) {
-
-  let matrix = [];
-
-  for (i=0; i < xyzCoordinates.length; i++) {
-    for (j=0; j < xyzCoordinates.length; j++) {
-       distance_ij = euclideanDistance(xyzCoordinates[i][0], xyzCoordinates[i][1], xyzCoordinates[i][2], xyzCoordinates[j][0], xyzCoordinates[j][1], xyzCoordinates[j][2])
-        if (distance_ij < distanceParamater) {
-          matrix[i][j] = 1
-        }
-
-        else {
-          matrix[i][j] = 0
-        }
-     // console.log("i=", i, "j=", j, "dist=", distance_ij);
-     
-    }
-  }
-return matrix
-}
 
 
   
-  return xyzCoordinates + finalAtomInfo + createMatrix(10)
+  return [xyzCoordinates, finalAtomInfo]
 }
+
+
+
+function combineElements () {
+
+  let infoList = getAtomInformation(this.responseText);
+  let atomDist = createMatrix(cords, d);
+  let cords = infoList[0];
+  let information = infoList[1];
+  let bigArray = [];
+  let temporary = [];
+
+  for (let i=0; i < information.length; i++) {
+    temporary.push(information[i]);
+    temporary.push(cords[i]);
+    let onesNum = countOnes(atomDist[i]);
+    temporary.push(onesNum);
+    bigArray.push(temporary);
+    temporary = []
+  }
+  return bigArray
+}
+
+function countOnes (array) {
+  let sums = 0;
+  for (let i = 0; i < array.length; i++) {
+
+    if (array[i] == 1) {
+      sums += 1
+    }
+  }
+  return sums
+}
+
