@@ -6,15 +6,13 @@ function displayOnPage(content) {
     resultField.innerText = content;
 }
 
-function downloadMolecule(code) {
+function downloadMolecule(code, distanceThreshold) {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-        // let result = getAtomInformation(this.responseText);
-        // let distMatrix = createMatrix(result[0], d);
-        // let finalEverything = [result, distMatrix]
-        let result = combineElements();
-        // displayOnPage(finalEverything);
+        
+        let result = combineElements(this.responseText, distanceThreshold);
+        
         displayOnPage(result);
         
     }
@@ -28,17 +26,19 @@ function downloadMolecule(code) {
 function run() {
     let inputbox = document.getElementById("input-text");
     let pdbcode = inputbox.value;
-    downloadMolecule(pdbcode);
+     let inputbox1 =  document.getElementById("distance-input");
+  let distanceThreshold = inputbox1.value;
+    downloadMolecule(pdbcode, distanceThreshold);
     
     
-    
-    
+    //this is the code that takes the input from the box for distance parameter
+
+   
 
 }
+  
+  console.log("hello");
 
-//this is the code that takes the input from the box for distance parameter
-let inputbox1 =  document.getElementById("distance-input");
-let d = inputbox1.value;
 
 window.run = run;
 // console.log("abcdfg");
@@ -90,13 +90,14 @@ function getAtomInformation(pdbfile) {
 
 
 
-function combineElements () {
+function combineElements (pdbInfo, distanceThreshold) {
 
-  let infoList = getAtomInformation(this.responseText);
-  let atomDist = createMatrix(cords, d);
+  let infoList = getAtomInformation(pdbInfo);
   let cords = infoList[0];
+  let atomDist = createMatrix(cords, distanceThreshold);
+  
   let information = infoList[1];
-  let bigArray = [];
+  let finalData = [];
   let temporary = [];
 
   for (let i=0; i < information.length; i++) {
@@ -104,20 +105,20 @@ function combineElements () {
     temporary.push(cords[i]);
     let onesNum = countOnes(atomDist[i]);
     temporary.push(onesNum);
-    bigArray.push(temporary);
+    finalData.push(temporary);
     temporary = []
   }
-  return bigArray
+  return finalData
 }
 
 function countOnes (array) {
-  let sums = 0;
+  let sumOfOnes = 0;
   for (let i = 0; i < array.length; i++) {
 
     if (array[i] == 1) {
-      sums += 1
+      sumOfOnes += 1
     }
   }
-  return sums
+  return sumOfOnes
 }
 

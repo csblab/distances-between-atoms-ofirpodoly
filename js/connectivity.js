@@ -12,7 +12,7 @@ export function createMatrix(xyzCoordinates, distanceParamater) {
 
   for (let i=0; i < xyzCoordinates.length; i++) {
     let atomRow = [];
-    for (let j=0; j < xyzCoordinates.length; j++) {
+    for (let j= i+1; j < xyzCoordinates.length; j++) {
        let distance_ij = euclideanDistance(xyzCoordinates[i][0], xyzCoordinates[i][1], xyzCoordinates[i][2], xyzCoordinates[j][0], xyzCoordinates[j][1], xyzCoordinates[j][2])
         if (distance_ij <= distanceParamater) {
           atomRow.push(1)
